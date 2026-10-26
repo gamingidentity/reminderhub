@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Executive Workspace App</title>
+    
+    <!-- Web App Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkV4ZWN1dGl2ZSBXb3Jrc3BhY2UgQXBwIiwKICAic2hvcnRfbmFtZSI6ICJXc3BBcHAiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBmMTcyYSIsCiAgInRoZW1lX2NvbG9yIjogIiMwMjE0Yzc3IgogfQ==">
+
+    <script>
+        // Apply saved theme before first paint (default: dark)
+        (function () {
+            var t = 'dark';
+            try { t = localStorage.getItem('appTheme') || 'dark'; } catch (e) {}
+            document.documentElement.classList.toggle('dark', t === 'dark');
+        })();
+    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .drag-over { border-style: dashed !important; background-color: rgba(2, 132, 199, 0.08); }
+        .preset-btn.active { background-color: #0284c7; color: #ffffff; border-color: #0284c7; font-weight: 600; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 h-full flex flex-col transition-colors duration-200 overflow-x-hidden">
+
+    <!-- APP HEADER -->
+    <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur border-b border-slate-200 dark:border-slate-700/80 sticky top-0 z-30 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- App Brand & Title -->
+            <div class="flex items-center gap-3">
+                <!-- Reminder Hub Logo (icon + wordmark; wordmark switches color with light/dark mode) -->
+                <div class="flex items-center gap-2.5 pr-3 mr-1 border-r border-slate-200 dark:border-slate-700/80" aria-label="Reminder Hub">
+                    <svg viewBox="0 0 120 130" class="w-10 h-10 shrink-0" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="rhTop" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#d45df0"/><stop offset="1" stop-color="#9333c9"/>
+                            </linearGradient>
+                            <linearGradient id="rhRing" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#2563eb"/>
+                            </linearGradient>
+                            <linearGradient id="rhCurl" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#ffffff"/><stop offset="0.45" stop-color="#d4d4d8"/><stop offset="1" stop-color="#71717a"/>
+                            </linearGradient>
+                            <clipPath id="rhClip"><rect x="10" y="22" width="100" height="100" rx="20"/></clipPath>
+                        </defs>
+                        <g clip-path="url(#rhClip)">
+                            <rect x="10" y="22" width="100" height="100" fill="#f4f4f8"/>
+                            <rect x="10" y="22" width="100" height="34" fill="url(#rhTop)"/>
+                            <g fill="#050533">
+                                <rect x="42" y="66" width="16" height="16" rx="2"/><rect x="66" y="66" width="16" height="16" rx="2"/><rect x="90" y="66" width="16" height="16" rx="2"/>
+                                <rect x="42" y="88" width="16" height="16" rx="2"/><rect x="66" y="88" width="16" height="16" rx="2"/><rect x="90" y="88" width="16" height="16" rx="2"/>
+                            </g>
+                            <path d="M10 40 C 22 44, 34 58, 36 80 C 38 100, 50 114, 66 122 L 10 122 Z" fill="url(#rhCurl)"/>
+                            <path d="M10 44 C 20 50, 28 62, 30 84 C 31 100, 40 114, 52 122 L 10 122 Z" fill="#ffffff" opacity="0.35"/>
+                        </g>
+                        <g stroke="#050533" stroke-opacity="0.35" stroke-width="1" fill="url(#rhRing)">
+                            <rect x="30" y="6" width="9" height="30" rx="4.5"/>
+                            <rect x="55.5" y="6" width="9" height="30" rx="4.5"/>
+                            <rect x="81" y="6" width="9" height="30" rx="4.5"/>
+                        </g>
+                    </svg>
+                    <span class="font-extrabold text-[15px] tracking-wide uppercase leading-none whitespace-nowrap text-slate-900 dark:text-white transition-colors duration-200">Reminder Hub</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 id="appNameDisplay" class="font-bold text-lg text-slate-900 dark:text-white leading-tight">Executive Workspace App</h1>
+                        <button onclick="openRenameModal('app')" class="text-slate-400 hover:text-brand-500 text-xs p-1 rounded-lg transition" title="Rename App">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span class="inline-flex items-center gap-1 font-medium text-brand-600 dark:text-brand-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> App Online
+                        </span>
+                        <span>•</span>
+                        <span id="presetLabelHeader" class="truncate max-w-[120px]">Preset 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Action Controls & Presets -->
+            <div class="flex items-center flex-wrap gap-2">
+                <!-- Preset Bar Container -->
+                <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-x-auto max-w-full" id="presetBar">
+                    <!-- Dynamic Presets -->
+                </div>
+                
+                <button onclick="openRenameModal('preset')" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition" title="Rename Active Preset">
+                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                </button>
+
+                <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+                <!-- C / F Temperature Toggle -->
+                <button id="unitToggleBtn" onclick="toggleTempUnit()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600 transition flex items-center gap-1 border border-slate-200 dark:border-slate-700">
+                    <span id="celsiusLabel" class="text-brand-600 dark:text-brand-400 font-bold">°C</span>
+                    <span class="text-slate-400">/</span>
+                    <span id="fahrenheitLabel" class="text-slate-400">°F</span>
+                </button>
+
+                <!-- Light / Dark Mode Toggle (same style as the C / F toggle, no icon-library dependency) -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700" title="Switch Light / Dark Mode" aria-label="Switch light or dark mode">
+                    <svg class="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    <span class="text-brand-600 dark:text-slate-400 font-bold">Light</span>
+                    <span class="text-slate-400">/</span>
+                    <span class="text-slate-400 dark:text-brand-400 font-bold">Dark</span>
+                    <svg class="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+
+                <!-- App Settings / Backup Menu -->
+                <div class="relative">
+                    <button onclick="toggleAppMenu()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition" title="App Settings & Backup">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Settings Dropdown Menu -->
+                    <div id="appDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-2 z-50">
+                        <button onclick="exportAppData()" class="w-full text-left px-3 py-2 text-xs font-semibold rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4 text-brand-500"></i> Export Backup Data
+                        </button>
+                        <button onclick="triggerImport()" class="w-full text-left px-3 py-2 text-xs font-semibold rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                            <i data-lucide="upload" class="w-4 h-4 text-brand-500"></i> Import Data File
+                        </button>
+                        <input type="file" id="importInput" accept=".json" onchange="importAppData(event)" class="hidden">
+                        <div class="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                        <button onclick="resetCurrentPreset()" class="w-full text-left px-3 py-2 text-xs font-semibold rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Current Preset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD APP BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20 lg:pb-6">
+        
+        <!-- LEFT COLUMN: TIME & WEATHER WIDGETS (7 COLS) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- LIVE CLOCK CARD -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 p-8 opacity-5 group-hover:opacity-10 transition duration-500">
+                    <i data-lucide="clock" class="w-44 h-44 text-brand-500"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-3 py-1 rounded-full border border-brand-200/50 dark:border-brand-500/20">
+                            Live Time Widget
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span id="audioStatusBadge" class="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                                <i data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-400"></i> Audio Alerts Active
+                            </span>
+                        </div>
+                    </div>
+                    <div id="clockDisplay" class="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white mt-4 font-mono tracking-tight leading-none">
+                        00:00:00 AM
+                    </div>
+                    <div id="dateDisplay" class="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2">
+                        Loading date...
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEATHER FORECAST CARD -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="cloud-sun" class="w-5 h-5 text-amber-500"></i> 7-Day Forecast
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Refreshes automatically every Sunday</p>
+                        </div>
+                        <div id="currentTempBadge" class="text-xl font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+                            34°C
+                        </div>
+                    </div>
+
+                    <!-- Forecast Cards Grid -->
+                    <div id="forecastGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 mt-4">
+                        <!-- Dynamic Forecast Items -->
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                    <span class="flex items-center gap-1.5"><i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand-500"></i> Auto-sync enabled</span>
+                    <span id="nextRefreshNotice" class="font-medium text-slate-500 dark:text-slate-300">Next refresh: Sunday</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: DRAGGABLE PLAN BOARD APP (5 COLS) -->
+        <section class="lg:col-span-5 flex flex-col">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex-1 flex flex-col">
+                <!-- Board Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 bg-brand-500/10 rounded-xl text-brand-600 dark:text-brand-400">
+                            <i data-lucide="kanban" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Plan Board</h2>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Drag items to rearrange</p>
+                        </div>
+                    </div>
+                    <button onclick="openTaskModal()" class="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5 text-xs font-semibold">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Plan
+                    </button>
+                </div>
+
+                <!-- Columns Container -->
+                <div class="grid grid-cols-1 gap-4 flex-1">
+                    
+                    <!-- COLUMN: TO DO -->
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-700/50 flex flex-col"
+                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'todo')">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> To Do
+                            </span>
+                            <span id="todoCount" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0</span>
+                        </div>
+                        <div id="todoList" class="space-y-2.5 flex-1 min-h-[90px] custom-scrollbar overflow-y-auto max-h-[220px]">
+                            <!-- Task cards -->
+                        </div>
+                    </div>
+
+                    <!-- COLUMN: IN PROGRESS -->
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-700/50 flex flex-col"
+                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'in_progress')">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span> In Progress
+                            </span>
+                            <span id="inProgressCount" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0</span>
+                        </div>
+                        <div id="inProgressList" class="space-y-2.5 flex-1 min-h-[90px] custom-scrollbar overflow-y-auto max-h-[220px]">
+                            <!-- Task cards -->
+                        </div>
+                    </div>
+
+                    <!-- COLUMN: COMPLETED -->
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-700/50 flex flex-col"
+                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'completed')">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Completed
+                            </span>
+                            <span id="completedCount" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0</span>
+                        </div>
+                        <div id="completedList" class="space-y-2.5 flex-1 min-h-[90px] custom-scrollbar overflow-y-auto max-h-[220px]">
+                            <!-- Task cards -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ANALYSIS: TASKS / MONEY (full width, below the dashboard) -->
+        <section class="lg:col-span-12">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                <!-- Header: title + mode switch + range switch -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 bg-brand-500/10 rounded-xl text-brand-600 dark:text-brand-400">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Analysis</h2>
+                            <p id="analysisSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center flex-wrap gap-2">
+                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-2xl border border-slate-200 dark:border-slate-700" id="analysisModeBar">
+                            <button data-mode="tasks" onclick="setAnalysisMode('tasks')" class="analysis-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition">Tasks</button>
+                            <button data-mode="money" onclick="setAnalysisMode('money')" class="analysis-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition">Money</button>
+                        </div>
+                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-2xl border border-slate-200 dark:border-slate-700" id="analysisRangeBar">
+                            <button data-range="week" onclick="setAnalysisRange('week')" class="analysis-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition">1 Week</button>
+                            <button data-range="month" onclick="setAnalysisRange('month')" class="analysis-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition">1 Month</button>
+                            <button data-range="year" onclick="setAnalysisRange('year')" class="analysis-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition">1 Year</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MONEY INPUTS (shown in Money mode) -->
+                <div id="moneyInputs" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneySalary" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                            <span class="w-5 h-5 shrink-0 rounded-full bg-brand-600 text-white text-[10px] flex items-center justify-center">1</span> Enter your salary <span class="normal-case font-medium text-slate-400">(per month)</span>
+                        </label>
+                        <input type="number" min="0" step="any" inputmode="decimal" id="moneySalary" oninput="onMoneyInput()" placeholder="e.g. 1500"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneyDaily" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                            <span class="w-5 h-5 shrink-0 rounded-full bg-brand-600 text-white text-[10px] flex items-center justify-center">2</span> How much you usually spend <span class="normal-case font-medium text-slate-400">(per day)</span>
+                        </label>
+                        <input type="number" min="0" step="any" inputmode="decimal" id="moneyDaily" oninput="onMoneyInput()" placeholder="e.g. 20"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneyExtra" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                            <span class="w-5 h-5 shrink-0 rounded-full bg-brand-600 text-white text-[10px] flex items-center justify-center">3</span> Extra spent <span class="normal-case font-medium text-slate-400">(one-time, 0 or negative OK)</span>
+                        </label>
+                        <input type="number" step="any" inputmode="decimal" id="moneyExtra" oninput="onMoneyInput()" placeholder="e.g. 0 or -50"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneyOwned" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                            <span class="w-5 h-5 shrink-0 rounded-full bg-brand-600 text-white text-[10px] flex items-center justify-center">4</span> Money you already own
+                        </label>
+                        <input type="number" step="any" inputmode="decimal" id="moneyOwned" oninput="onMoneyInput()" placeholder="e.g. 3000"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneyCurrency" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Money currency</label>
+                        <select id="moneyCurrency" onchange="onMoneyInput()"
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </select>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50">
+                        <label for="moneyDisplayCurrency" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Analyze / display in</label>
+                        <select id="moneyDisplayCurrency" onchange="onMoneyCurrencyChange()"
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </select>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50 md:col-span-2 lg:col-span-1">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Currency converter</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" min="0" step="any" id="converterAmount" value="1" oninput="convertCurrency()"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" aria-label="Amount to convert">
+                            <div id="converterResult" class="flex items-center justify-center px-2 rounded-xl bg-white dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 text-sm font-bold text-slate-900 dark:text-white">—</div>
+                        </div>
+                        <div id="converterRate" class="text-[10px] text-slate-400 mt-1.5">Live rate when available</div>
+                    </div>
+                </div>
+
+                <!-- Summary numbers -->
+                <div id="analysisStats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+
+                <!-- Chart -->
+                <div id="analysisChart" class="w-full overflow-x-auto"></div>
+
+                <!-- Legend / footnote -->
+                <div id="analysisLegend" class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 text-[11px] text-slate-500 dark:text-slate-400"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CREATE/EDIT TASK MODAL -->
+    <div id="taskModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" id="taskModalTitle">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-brand-500"></i> Add New Plan
+                </h3>
+                <button onclick="closeTaskModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+                <input type="hidden" id="taskId">
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Plan Title</label>
+                    <input type="text" id="taskTitle" required placeholder="e.g. Executive Strategy Review"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Plan Date & Time</label>
+                        <input type="datetime-local" id="taskTime" required
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Remind Me Before</label>
+                        <select id="taskReminder"
+                                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="5">5 minutes</option>
+                            <option value="10">10 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Status Column</label>
+                    <select id="taskStatus"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="todo">To Do</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i> Save Plan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RENAME MODAL -->
+    <div id="renameModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3" id="renameModalTitle">Rename</h3>
+            <input type="text" id="renameInput" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 mb-4" placeholder="Enter new name...">
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeRenameModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmRename()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition">
+                    Save Name
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        const APP_STORAGE_KEY = 'executive_workspace_app_v6';
+        let currentPresetIndex = 0;
+        let isFahrenheit = false;
+        let renameTarget = null; // 'app' or 'preset'
+        let draggedTaskId = null;
+        let activeRemindersTriggered = new Set();
+        let audioCtx = null;
+
+        // Safe Lucide Initializer
+        function initLucide() {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+        }
+
+        // Play Beep Sound for Reminders using Web Audio API
+        function playReminderSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio notification fallback');
+            }
+        }
+
+        // Weather Data (Celsius)
+        const baseWeatherData = [
+            { day: 'Today', condition: 'Sunny', high: 34, low: 24, icon: 'sun' },
+            { day: 'Mon', condition: 'Clear Sky', high: 33, low: 23, icon: 'sun' },
+            { day: 'Tue', condition: 'Partly Cloudy', high: 32, low: 24, icon: 'cloud-sun' },
+            { day: 'Wed', condition: 'Warm', high: 35, low: 25, icon: 'sun' },
+            { day: 'Thu', condition: 'Breezy', high: 31, low: 22, icon: 'wind' },
+            { day: 'Fri', condition: 'Sunny', high: 33, low: 23, icon: 'sun' },
+            { day: 'Sat', condition: 'Clear', high: 34, low: 24, icon: 'sun' }
+        ];
+
+        // Initial Default Presets
+        const defaultState = {
+            appName: 'Executive Workspace App',
+            isFahrenheit: false,
+            activePreset: 0,
+            presets: [
+                { id: 1, name: 'Preset 1', plans: [] },
+                { id: 2, name: 'Preset 2', plans: [] },
+                { id: 3, name: 'Preset 3', plans: [] },
+                { id: 4, name: 'Preset 4', plans: [] },
+                { id: 5, name: 'Preset 5', plans: [] }
+            ]
+        };
+
+        let appState = loadAppState();
+        let plans = appState.presets[currentPresetIndex].plans || [];
+
+        function loadAppState() {
+            const saved = localStorage.getItem(APP_STORAGE_KEY);
+            if (!saved) return defaultState;
+            try {
+                const parsed = JSON.parse(saved);
+                currentPresetIndex = parsed.activePreset || 0;
+                isFahrenheit = parsed.isFahrenheit || false;
+                return parsed;
+            } catch (e) {
+                return defaultState;
+            }
+        }
+
+        function saveAppState() {
+            appState.presets[currentPresetIndex].plans = plans;
+            appState.isFahrenheit = isFahrenheit;
+            appState.activePreset = currentPresetIndex;
+            localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function (m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        function toFahrenheit(celsius) {
+            return Math.round((celsius * 9/5) + 32);
+        }
+
+        /* CLOCK & WEATHER */
+        function updateClock() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+            document.getElementById('clockDisplay').textContent = now.toLocaleTimeString('en-US', timeOptions);
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', dateOptions);
+
+            checkReminders(now);
+        }
+
+        function renderWeather() {
+            const grid = document.getElementById('forecastGrid');
+            const unit = isFahrenheit ? '°F' : '°C';
+
+            document.getElementById('currentTempBadge').textContent = 
+                `${isFahrenheit ? toFahrenheit(baseWeatherData[0].high) : baseWeatherData[0].high}${unit}`;
+
+            document.getElementById('celsiusLabel').className = isFahrenheit ? 'text-slate-400' : 'text-brand-600 dark:text-brand-400 font-bold';
+            document.getElementById('fahrenheitLabel').className = isFahrenheit ? 'text-brand-600 dark:text-brand-400 font-bold' : 'text-slate-400';
+
+            grid.innerHTML = baseWeatherData.map(item => {
+                const high = isFahrenheit ? toFahrenheit(item.high) : item.high;
+                const low = isFahrenheit ? toFahrenheit(item.low) : item.low;
+
+                return `
+                    <div class="flex flex-col items-center p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">${item.day}</span>
+                        <i data-lucide="${item.icon}" class="w-5 h-5 text-amber-500 my-1"></i>
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-100 mt-1">${high}${unit}</span>
+                        <span class="text-[10px] text-slate-400">${low}${unit}</span>
+                    </div>
+                `;
+            }).join('');
+
+            initLucide();
+        }
+
+        function toggleTempUnit() {
+            isFahrenheit = !isFahrenheit;
+            saveAppState();
+            renderWeather();
+        }
+
+        /* PRESETS & DASHBOARD RENAMING */
+        function renderPresetBar() {
+            const bar = document.getElementById('presetBar');
+            bar.innerHTML = appState.presets.map((preset, index) => `
+                <button onclick="switchPreset(${index})" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium transition ${index === currentPresetIndex ? 'active' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
+                    ${escapeHtml(preset.name)}
+                </button>
+            `).join('');
+            document.getElementById('appNameDisplay').textContent = appState.appName || 'Executive Workspace App';
+            document.getElementById('presetLabelHeader').textContent = appState.presets[currentPresetIndex].name;
+        }
+
+        function switchPreset(index) {
+            currentPresetIndex = index;
+            plans = appState.presets[currentPresetIndex].plans || [];
+            saveAppState();
+            renderPresetBar();
+            renderBoard();
+            showToast(`Switched to ${appState.presets[index].name}`, 'info');
+        }
+
+        function openRenameModal(target) {
+            renameTarget = target;
+            const modal = document.getElementById('renameModal');
+            const input = document.getElementById('renameInput');
+            const title = document.getElementById('renameModalTitle');
+
+            if (target === 'app') {
+                title.textContent = 'Rename Application';
+                input.value = appState.appName || 'Executive Workspace App';
+            } else {
+                title.textContent = 'Rename Active Preset';
+                input.value = appState.presets[currentPresetIndex].name;
+            }
+
+            modal.classList.remove('hidden');
+            input.focus();
+        }
+
+        function closeRenameModal() {
+            document.getElementById('renameModal').classList.add('hidden');
+        }
+
+        function confirmRename() {
+            const val = document.getElementById('renameInput').value.trim();
+            if (!val) return;
+
+            if (renameTarget === 'app') {
+                appState.appName = val;
+            } else {
+                appState.presets[currentPresetIndex].name = val;
+            }
+
+            saveAppState();
+            renderPresetBar();
+            closeRenameModal();
+            showToast('Name saved', 'info');
+        }
+
+        /* PLAN BOARD DRAG & DROP & CRUD */
+        function renderBoard() {
+            const lists = {
+                todo: document.getElementById('todoList'),
+                in_progress: document.getElementById('inProgressList'),
+                completed: document.getElementById('completedList')
+            };
+
+            const counts = { todo: 0, in_progress: 0, completed: 0 };
+
+            Object.keys(lists).forEach(key => lists[key].innerHTML = '');
+
+            plans.forEach(plan => {
+                counts[plan.status]++;
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm cursor-grab active:cursor-grabbing hover:border-brand-500 transition group';
+                card.draggable = true;
+                card.ondragstart = (e) => handleDragStart(e, plan.id);
+
+                const dateObj = new Date(plan.time);
+                const timeFormatted = dateObj.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <h4 class="font-semibold text-xs text-slate-800 dark:text-slate-100 leading-snug">${escapeHtml(plan.title)}</h4>
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="editTask('${plan.id}')" class="text-slate-400 hover:text-brand-500 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteTask('${plan.id}')" class="text-slate-400 hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-2.5 flex items-center justify-between text-[10px] text-slate-400">
+                        <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brand-500"></i> ${timeFormatted}</span>
+                        <span class="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded-md text-slate-500 dark:text-slate-300 font-semibold">-${plan.reminder}m</span>
+                    </div>
+                `;
+                lists[plan.status].appendChild(card);
+            });
+
+            document.getElementById('todoCount').textContent = counts.todo;
+            document.getElementById('inProgressCount').textContent = counts.in_progress;
+            document.getElementById('completedCount').textContent = counts.completed;
+            if (typeof renderAnalysis === 'function') renderAnalysis();
+
+            initLucide();
+        }
+
+        function handleDragStart(e, taskId) {
+            draggedTaskId = taskId;
+            e.dataTransfer.setData('text/plain', taskId);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, status) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const task = plans.find(p => p.id === draggedTaskId);
+            if (task && task.status !== status) {
+                task.status = status;
+                saveAppState();
+                renderBoard();
+            }
+        }
+
+        /* MODAL & TASK SAVING */
+        function openTaskModal(taskId = null) {
+            const modal = document.getElementById('taskModal');
+            const form = document.getElementById('taskForm');
+            
+            if (taskId) {
+                const task = plans.find(p => p.id === taskId);
+                document.getElementById('taskId').value = task.id;
+                document.getElementById('taskTitle').value = task.title;
+                document.getElementById('taskTime').value = task.time;
+                document.getElementById('taskReminder').value = task.reminder;
+                document.getElementById('taskStatus').value = task.status;
+                document.getElementById('taskModalTitle').innerHTML = '<i data-lucide="edit-3" class="w-5 h-5 text-brand-500"></i> Edit Plan';
+            } else {
+                form.reset();
+                document.getElementById('taskId').value = '';
+                document.getElementById('taskModalTitle').innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 text-brand-500"></i> Add New Plan';
+            }
+            modal.classList.remove('hidden');
+            initLucide();
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+
+        function saveTask(e) {
+            e.preventDefault();
+            const id = document.getElementById('taskId').value;
+            const title = document.getElementById('taskTitle').value;
+            const time = document.getElementById('taskTime').value;
+            const reminder = document.getElementById('taskReminder').value;
+            const status = document.getElementById('taskStatus').value;
+
+            if (id) {
+                const index = plans.findIndex(p => p.id === id);
+                if (index !== -1) plans[index] = { id, title, time, reminder, status };
+            } else {
+                plans.push({ id: Date.now().toString(), title, time, reminder, status });
+            }
+
+            saveAppState();
+            renderBoard();
+            closeTaskModal();
+            showToast('Plan saved', 'info');
+        }
+
+        function editTask(id) {
+            openTaskModal(id);
+        }
+
+        function deleteTask(id) {
+            plans = plans.filter(p => p.id !== id);
+            saveAppState();
+            renderBoard();
+            showToast('Plan deleted', 'info');
+        }
+
+        /* REMINDERS & TOAST SYSTEM */
+        function checkReminders(now) {
+            plans.forEach(plan => {
+                if (!plan.time) return;
+                const targetTime = new Date(plan.time).getTime();
+                const leadTimeMs = parseInt(plan.reminder, 10) * 60 * 1000;
+                const triggerTime = targetTime - leadTimeMs;
+
+                if (now.getTime() >= triggerTime && now.getTime() < targetTime) {
+                    const key = `${plan.id}-${plan.time}`;
+                    if (!activeRemindersTriggered.has(key)) {
+                        activeRemindersTriggered.add(key);
+                        playReminderSound();
+                        showToast(`Reminder: "${plan.title}" in ${plan.reminder} mins!`, 'warning');
+                    }
+                }
+            });
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'warning' ? 'bg-amber-500 text-white' : 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900';
+            toast.className = `p-3.5 rounded-2xl shadow-xl ${bgColor} text-xs font-bold flex items-center justify-between pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 border border-white/10`;
+            toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="${type === 'warning' ? 'bell' : 'info'}" class="w-4 h-4"></i> ${escapeHtml(msg)}</span>`;
+
+            container.appendChild(toast);
+            initLucide();
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        /* ANALYSIS (TASKS / MONEY) */
+        const ANALYSIS_COLORS = {
+            todo: '#f97316',        // orange
+            in_progress: '#0ea5e9', // blue
+            completed: '#10b981',   // green
+            income: '#14b8a6',
+            spent: '#f43f5e',
+            saved: '#6366f1'
+        };
+
+        function getAnalysis() {
+            appState.analysis = Object.assign(
+                { mode: 'tasks', range: 'week', salary: '', daily: '', extra: '', owned: '', currency: 'OMR', displayCurrency: 'OMR', converterAmount: 1, converterTo: 'USD', exchangeRate: null, rateUpdatedAt: null },
+                appState.analysis || {}
+            );
+            return appState.analysis;
+        }
+
+        function setAnalysisMode(mode) {
+            getAnalysis().mode = mode;
+            saveAppState();
+            renderAnalysis();
+        }
+
+        function setAnalysisRange(range) {
+            getAnalysis().range = range;
+            saveAppState();
+            renderAnalysis();
+        }
+
+        function onMoneyInput() {
+            const a = getAnalysis();
+            a.salary = document.getElementById('moneySalary').value;
+            a.daily = document.getElementById('moneyDaily').value;
+            a.extra = document.getElementById('moneyExtra').value;
+            a.owned = document.getElementById('moneyOwned').value;
+            a.currency = document.getElementById('moneyCurrency').value;
+            a.displayCurrency = document.getElementById('moneyDisplayCurrency').value || a.currency;
+            a.converterAmount = parseFloat(document.getElementById('converterAmount').value) || 0;
+            saveAppState();
+            updateAnalysisRate().then(() => renderAnalysis(true));
+        }
+
+        function fmtNum(n) {
+            const abs = Math.abs(n);
+            const sign = n < 0 ? '-' : '';
+            if (abs >= 1e6) return sign + (abs / 1e6).toFixed(abs >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M';
+            if (abs >= 1e4) return sign + (abs / 1e3).toFixed(abs >= 1e5 ? 0 : 1).replace(/\.0$/, '') + 'k';
+            if (abs >= 100) return sign + Math.round(abs).toLocaleString('en-US');
+            return sign + (Math.round(abs * 10) / 10).toLocaleString('en-US');
+        }
+
+        function niceStep(range, targetTicks) {
+            const rough = range / targetTicks;
+            const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+            const n = rough / pow;
+            const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+            return nice * pow;
+        }
+
+        // Generic responsive SVG line chart (theme-aware through Tailwind classes)
+        function buildLineChart(opts) {
+            const { labels, series, todayIdx, yMin, yMax, yStep, valueLabels, endLabels } = opts;
+            const W = 720, H = 290, ml = 46, mr = 18, mt = 22, mb = 36;
+            const N = labels.length;
+            const x = i => ml + (N === 1 ? 0 : i * (W - ml - mr) / (N - 1));
+            const y = v => mt + (1 - (v - yMin) / (yMax - yMin)) * (H - mt - mb);
+            const dense = N > 14;
+            let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full min-w-[520px] h-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Analysis chart">`;
+
+            // grid + y labels
+            for (let v = yMin; v <= yMax + yStep * 0.001; v += yStep) {
+                const yy = y(v).toFixed(1);
+                const isZero = Math.abs(v) < yStep * 0.001;
+                svg += `<line x1="${ml}" x2="${W - mr}" y1="${yy}" y2="${yy}" class="${isZero ? 'stroke-slate-300 dark:stroke-slate-500' : 'stroke-slate-200 dark:stroke-slate-700'}" stroke-width="1" ${isZero ? '' : 'stroke-dasharray="3 4"'}/>`;
+                svg += `<text x="${ml - 8}" y="${(+yy + 3.5).toFixed(1)}" text-anchor="end" font-size="10" class="fill-slate-400">${fmtNum(v)}</text>`;
+            }
+
+            // x labels
+            labels.forEach((lab, i) => {
+                if (lab === '') return;
+                svg += `<text x="${x(i).toFixed(1)}" y="${H - 14}" text-anchor="middle" font-size="10" class="fill-slate-400">${escapeHtml(lab)}</text>`;
+            });
+
+            // today marker
+            if (todayIdx != null && todayIdx >= 0 && todayIdx < N) {
+                svg += `<line x1="${x(todayIdx).toFixed(1)}" x2="${x(todayIdx).toFixed(1)}" y1="${mt - 6}" y2="${H - mb}" class="stroke-brand-500" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.7"/>`;
+                svg += `<text x="${x(todayIdx).toFixed(1)}" y="${mt - 9}" text-anchor="middle" font-size="9.5" font-weight="700" class="fill-brand-500">TODAY</text>`;
+            }
+
+            // lines
+            series.forEach(s => {
+                const d = s.values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+                svg += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+            });
+
+            // points + numbers
+            series.forEach(s => {
+                s.values.forEach((v, i) => {
+                    svg += `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="${dense ? 2.4 : 4}" fill="${s.color}" class="stroke-white dark:stroke-slate-800" stroke-width="1.5"/>`;
+                    if (valueLabels && v > 0) {
+                        svg += `<text x="${x(i).toFixed(1)}" y="${(y(v) - 8).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="${s.color}">${v}</text>`;
+                    }
+                });
+                if (endLabels) {
+                    const last = s.values.length - 1;
+                    svg += `<text x="${x(last).toFixed(1)}" y="${(y(s.values[last]) - 9).toFixed(1)}" text-anchor="end" font-size="11" font-weight="700" fill="${s.color}">${fmtNum(s.values[last])}</text>`;
+                }
+            });
+
+            return svg + '</svg>';
+        }
+
+        function startOfDay(d) { const c = new Date(d); c.setHours(0, 0, 0, 0); return c; }
+
+        function renderTaskAnalysis(a) {
+            const now = new Date();
+            const today = startOfDay(now);
+            const monthShort = { month: 'short' };
+            let N, todayIdx, labels = [], bucketOf, rangeText;
+
+            if (a.range === 'year') {
+                N = 12; todayIdx = 6;
+                const start = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+                for (let i = 0; i < N; i++) labels.push(new Date(start.getFullYear(), start.getMonth() + i, 1).toLocaleDateString('en-US', monthShort));
+                bucketOf = d => (d.getFullYear() - start.getFullYear()) * 12 + d.getMonth() - start.getMonth();
+                rangeText = `${labels[0]} ${start.getFullYear()} – ${labels[N - 1]} ${new Date(start.getFullYear(), start.getMonth() + N - 1, 1).getFullYear()}`;
+            } else {
+                N = a.range === 'month' ? 30 : 7;
+                todayIdx = a.range === 'month' ? 15 : 3;
+                const start = new Date(today); start.setDate(start.getDate() - todayIdx);
+                for (let i = 0; i < N; i++) {
+                    const d = new Date(start); d.setDate(start.getDate() + i);
+                    if (a.range === 'week') labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + d.getDate());
+                    else labels.push(i % 5 === 0 || i === todayIdx ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
+                }
+                if (a.range === 'month') {
+                    // avoid overlapping labels next to "today"
+                    labels = labels.map((l, i) => (i !== todayIdx && Math.abs(i - todayIdx) < 3 && l) ? '' : l);
+                }
+                bucketOf = d => Math.round((startOfDay(d) - start) / 86400000);
+                const end = new Date(start); end.setDate(end.getDate() + N - 1);
+                rangeText = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+            }
+
+            const counts = { todo: Array(N).fill(0), in_progress: Array(N).fill(0), completed: Array(N).fill(0) };
+            plans.forEach(p => {
+                const d = new Date(p.time);
+                if (isNaN(d) || !counts[p.status]) return;
+                const idx = bucketOf(d);
+                if (idx >= 0 && idx < N) counts[p.status][idx]++;
+            });
+
+            const totals = {};
+            Object.keys(counts).forEach(k => totals[k] = counts[k].reduce((s, v) => s + v, 0));
+            const grand = totals.todo + totals.in_progress + totals.completed;
+            const peak = Math.max(0, ...counts.todo, ...counts.in_progress, ...counts.completed);
+            const step = Math.max(1, Math.ceil(Math.max(peak, 2) / 4));
+            const yMax = step * 4;
+
+            const chip = (label, key) => `
+                <div class="rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"><span class="w-2.5 h-2.5 rounded-full" style="background:${ANALYSIS_COLORS[key]}"></span>${label}</div>
+                    <div class="text-3xl font-black mt-1" style="color:${ANALYSIS_COLORS[key]}">${totals[key]}</div>
+                </div>`;
+            document.getElementById('analysisStats').className = 'grid grid-cols-2 md:grid-cols-4 gap-3 mb-4';
+            document.getElementById('analysisStats').innerHTML =
+                chip('To Do', 'todo') + chip('In Progress', 'in_progress') + chip('Completed', 'completed') + `
+                <div class="rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/40">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total in period</div>
+                    <div class="text-3xl font-black mt-1 text-slate-900 dark:text-white">${grand}</div>
+                </div>`;
+
+            document.getElementById('analysisChart').innerHTML = buildLineChart({
+                labels, todayIdx, yMin: 0, yMax, yStep: step, valueLabels: true,
+                series: [
+                    { color: ANALYSIS_COLORS.todo, values: counts.todo },
+                    { color: ANALYSIS_COLORS.in_progress, values: counts.in_progress },
+                    { color: ANALYSIS_COLORS.completed, values: counts.completed }
+                ]
+            });
+
+            const unit = a.range === 'year' ? 'per month' : 'per day';
+            document.getElementById('analysisLegend').innerHTML = `
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.todo}"></span>To Do</span>
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.in_progress}"></span>In Progress</span>
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.completed}"></span>Completed</span>
+                <span class="text-slate-400">Plans counted ${unit} by their scheduled time · ${escapeHtml(appState.presets[currentPresetIndex].name)}${grand === 0 ? ' · add plans on the board to see the lines grow' : ''}</span>`;
+            document.getElementById('analysisSubtitle').textContent = `Tasks · ${rangeText}`;
+        }
+
+        const CURRENCIES = {
+            OMR: { name: 'Omani Rial', symbol: 'ر.ع.', flag: '🇴🇲' },
+            USD: { name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
+            EUR: { name: 'Euro', symbol: '€', flag: '🇪🇺' },
+            GBP: { name: 'British Pound', symbol: '£', flag: '🇬🇧' },
+            AED: { name: 'UAE Dirham', symbol: 'د.إ', flag: '🇦🇪' },
+            SAR: { name: 'Saudi Riyal', symbol: '﷼', flag: '🇸🇦' },
+            QAR: { name: 'Qatari Riyal', symbol: '﷼', flag: '🇶🇦' },
+            KWD: { name: 'Kuwaiti Dinar', symbol: 'د.ك', flag: '🇰🇼' },
+            BHD: { name: 'Bahraini Dinar', symbol: '.د.ب', flag: '🇧🇭' },
+            JPY: { name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵' },
+            INR: { name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳' },
+            CAD: { name: 'Canadian Dollar', symbol: 'C$', flag: '🇨🇦' },
+            AUD: { name: 'Australian Dollar', symbol: 'A$', flag: '🇦🇺' },
+            CHF: { name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' },
+            CNY: { name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
+            TRY: { name: 'Turkish Lira', symbol: '₺', flag: '🇹🇷' }
+        };
+
+        function populateCurrencySelects() {
+            const selects = [
+                document.getElementById('moneyCurrency'),
+                document.getElementById('moneyDisplayCurrency')
+            ];
+            selects.forEach(select => {
+                if (!select) return;
+                const current = select.value;
+                select.innerHTML = Object.entries(CURRENCIES).map(([code, c]) =>
+                    `<option value="${code}">${c.flag} ${code} — ${c.name}</option>`
+                ).join('');
+                if (CURRENCIES[current]) select.value = current;
+            });
+        }
+
+        function currencyFormat(value, code) {
+            const safeCode = CURRENCIES[code] ? code : 'USD';
+            try {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: safeCode,
+                    maximumFractionDigits: safeCode === 'JPY' ? 0 : 2
+                }).format(value);
+            } catch (e) {
+                return `${fmtNum(value)} ${safeCode}`;
+            }
+        }
+
+        async function fetchExchangeRate(from, to) {
+            if (!from || !to || from === to) return 1;
+            try {
+                const response = await fetch(`https://open.er-api.com/v6/latest/${encodeURIComponent(from)}`);
+                if (!response.ok) throw new Error('Rate request failed');
+                const data = await response.json();
+                const rate = data && data.rates ? Number(data.rates[to]) : NaN;
+                if (!Number.isFinite(rate) || rate <= 0) throw new Error('Rate unavailable');
+                return rate;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function updateAnalysisRate() {
+            const a = getAnalysis();
+            const from = CURRENCIES[a.currency] ? a.currency : 'OMR';
+            const to = CURRENCIES[a.displayCurrency] ? a.displayCurrency : from;
+            const rate = await fetchExchangeRate(from, to);
+            a.exchangeRate = rate;
+            a.rateUpdatedAt = rate ? new Date().toISOString() : null;
+            saveAppState();
+            return rate;
+        }
+
+        async function convertCurrency() {
+            const a = getAnalysis();
+            const amountEl = document.getElementById('converterAmount');
+            const resultEl = document.getElementById('converterResult');
+            const rateEl = document.getElementById('converterRate');
+            if (!amountEl || !resultEl || !rateEl) return;
+
+            const amount = Math.max(0, parseFloat(amountEl.value) || 0);
+            a.converterAmount = amount;
+            const from = CURRENCIES[a.currency] ? a.currency : 'OMR';
+            const to = CURRENCIES[a.converterTo] ? a.converterTo : 'USD';
+            const rate = await fetchExchangeRate(from, to);
+
+            if (rate === null) {
+                resultEl.textContent = 'Rate unavailable';
+                rateEl.textContent = 'Could not load a live rate. Check your connection.';
+                return;
+            }
+
+            resultEl.textContent = currencyFormat(amount * rate, to);
+            rateEl.textContent = `1 ${from} = ${rate.toFixed(6)} ${to} · live rate`;
+            a.exchangeRate = rate;
+            a.rateUpdatedAt = new Date().toISOString();
+            saveAppState();
+        }
+
+        async function onMoneyCurrencyChange() {
+            const a = getAnalysis();
+            a.currency = document.getElementById('moneyCurrency').value;
+            a.displayCurrency = document.getElementById('moneyDisplayCurrency').value || a.currency;
+            a.converterTo = a.displayCurrency === a.currency ? 'USD' : a.displayCurrency;
+            saveAppState();
+            await updateAnalysisRate();
+            renderAnalysis(true);
+            convertCurrency();
+        }
+
+        function renderMoneyAnalysis(a) {
+            const salary = Math.max(0, parseFloat(a.salary) || 0);
+            const daily = Math.max(0, parseFloat(a.daily) || 0);
+            const extra = parseFloat(a.extra) || 0;
+            const owned = parseFloat(a.owned) || 0;
+            const sourceCurrency = CURRENCIES[a.currency] ? a.currency : 'OMR';
+            const displayCurrency = CURRENCIES[a.displayCurrency] ? a.displayCurrency : sourceCurrency;
+            const rate = sourceCurrency === displayCurrency ? 1 : (Number(a.exchangeRate) || null);
+            const convert = value => rate === null ? value : value * rate;
+            const cur = displayCurrency;
+            const now = new Date();
+            let N, labels = [], earned = [], spent = [];
+
+            if (a.range === 'year') {
+                N = 12;
+                for (let m = 1; m <= N; m++) {
+                    labels.push(new Date(now.getFullYear(), now.getMonth() + m - 1, 1).toLocaleDateString('en-US', { month: 'short' }));
+                    earned.push(salary * m);
+                    spent.push(extra + daily * 30 * m);
+                }
+            } else {
+                N = a.range === 'month' ? 30 : 7;
+                for (let d = 1; d <= N; d++) {
+                    const dt = new Date(now); dt.setDate(now.getDate() + d - 1);
+                    if (a.range === 'week') labels.push(dt.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + dt.getDate());
+                    else labels.push(d === 1 || d % 5 === 0 ? String(d) : '');
+                    earned.push(salary / 30 * d);
+                    spent.push(extra + daily * d);
+                }
+            }
+
+            const balance = earned.map((e, i) => owned + e - spent[i]);
+            const totalE = earned[N - 1], totalS = spent[N - 1], endBalance = balance[N - 1];
+            const hasData = salary > 0 || daily > 0 || extra !== 0 || owned !== 0;
+            const spentPct = salary > 0 ? Math.round(daily * 30 / salary * 100) : null;
+            const card = (label, val, color) => `
+                <div class="rounded-2xl p-3.5 border border-slate-200/60 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/40">
+                    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">${color ? `<span class="w-2.5 h-2.5 rounded-full" style="background:${color}"></span>` : ''}${label}</div>
+                    <div class="text-2xl font-black mt-1 ${color ? '' : 'text-slate-900 dark:text-white'}" ${color ? `style="color:${color}"` : ''}>${val}</div>
+                </div>`;
+            const signed = n => (n > 0 ? '+' : '') + currencyFormat(convert(n), cur);
+
+            document.getElementById('analysisStats').className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4';
+            document.getElementById('analysisStats').innerHTML =
+                card('You own now', currencyFormat(convert(owned), cur), null) +
+                card('Earned', currencyFormat(convert(totalE), cur), ANALYSIS_COLORS.income) +
+                card('Spent', currencyFormat(convert(totalS), cur), ANALYSIS_COLORS.spent) +
+                card('Extra spent', (extra === 0 ? currencyFormat(0, cur) : signed(extra)), null) +
+                card('You will have', currencyFormat(convert(endBalance), cur), endBalance < 0 ? '#ef4444' : ANALYSIS_COLORS.saved) +
+                card('Spent of salary', spentPct === null ? '—' : spentPct + '%', null);
+
+            const chartEarned = earned.map(convert), chartSpent = spent.map(convert), chartBalance = balance.map(convert);
+            const all = [0, ...chartEarned, ...chartSpent, ...chartBalance];
+            let lo = Math.min(...all), hi = Math.max(...all);
+            if (hi - lo <= 0) hi = lo + 4;
+            const step = niceStep(hi - lo, 4);
+            const yMin = Math.floor(lo / step) * step;
+            const yMax = Math.ceil(hi / step) * step;
+
+            document.getElementById('analysisChart').innerHTML = buildLineChart({
+                labels, todayIdx: null, yMin, yMax, yStep: step, endLabels: true,
+                series: [
+                    { color: ANALYSIS_COLORS.income, values: chartEarned },
+                    { color: ANALYSIS_COLORS.spent, values: chartSpent },
+                    { color: ANALYSIS_COLORS.saved, values: chartBalance }
+                ]
+            });
+
+            const rateNote = sourceCurrency === displayCurrency
+                ? `Analysis currency: ${sourceCurrency}`
+                : rate
+                    ? `Converted from ${sourceCurrency} to ${displayCurrency} at 1 ${sourceCurrency} = ${rate.toFixed(6)} ${displayCurrency}`
+                    : `Waiting for live ${sourceCurrency} → ${displayCurrency} exchange rate…`;
+
+            document.getElementById('analysisLegend').innerHTML = `
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.income}"></span>Earned (cumulative)</span>
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.spent}"></span>Spent (cumulative)</span>
+                <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded" style="background:${ANALYSIS_COLORS.saved}"></span>Balance (money you own + earned − spent)</span>
+                <span class="text-slate-400">${hasData ? 'Based on a 30-day month' : 'Fill in the steps above to see your curve'} · ${escapeHtml(rateNote)}${endBalance < 0 ? ' · your balance goes below zero' : ''}</span>`;
+            const rangeName = { week: 'next 7 days', month: 'next 30 days', year: 'next 12 months' }[a.range];
+            document.getElementById('analysisSubtitle').textContent = `Money · ${rangeName} · ${displayCurrency}`;
+        }
+
+        function renderAnalysis(fromTyping = false) {
+            if (!document.getElementById('analysisChart')) return;
+            const a = getAnalysis();
+
+            // pill states
+            document.querySelectorAll('#analysisModeBar .analysis-pill').forEach(b => {
+                const on = b.dataset.mode === a.mode;
+                b.className = 'analysis-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ' +
+                    (on ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600');
+            });
+            document.querySelectorAll('#analysisRangeBar .analysis-pill').forEach(b => {
+                const on = b.dataset.range === a.range;
+                b.className = 'analysis-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition ' +
+                    (on ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600');
+            });
+
+            const moneyBox = document.getElementById('moneyInputs');
+            moneyBox.classList.toggle('hidden', a.mode !== 'money');
+            populateCurrencySelects();
+            if (!fromTyping) {
+                document.getElementById('moneySalary').value = a.salary;
+                document.getElementById('moneyDaily').value = a.daily;
+                document.getElementById('moneyExtra').value = a.extra;
+                document.getElementById('moneyOwned').value = a.owned;
+                document.getElementById('moneyCurrency').value = CURRENCIES[a.currency] ? a.currency : 'OMR';
+                document.getElementById('moneyDisplayCurrency').value = CURRENCIES[a.displayCurrency] ? a.displayCurrency : (a.currency || 'OMR');
+                document.getElementById('converterAmount').value = a.converterAmount || 1;
+            }
+
+            if (a.mode === 'money') {
+                renderMoneyAnalysis(a);
+                convertCurrency();
+            } else renderTaskAnalysis(a);
+        }
+
+        /* APP SETTINGS & DATA EXPORT / IMPORT */
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('appTheme', isDark ? 'dark' : 'light'); } catch (e) {}
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+        }
+
+        function toggleAppMenu() {
+            const menu = document.getElementById('appDropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        function exportAppData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `workspace_app_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            toggleAppMenu();
+            showToast('App backup downloaded', 'info');
+        }
+
+        function triggerImport() {
+            document.getElementById('importInput').click();
+            toggleAppMenu();
+        }
+
+        function importAppData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (imported && imported.presets) {
+                        appState = imported;
+                        currentPresetIndex = imported.activePreset || 0;
+                        isFahrenheit = imported.isFahrenheit || false;
+                        plans = appState.presets[currentPresetIndex].plans || [];
+                        saveAppState();
+                        renderPresetBar();
+                        renderWeather();
+                        renderBoard();
+                        showToast('App data imported successfully', 'info');
+                    }
+                } catch (err) {
+                    showToast('Invalid JSON import file', 'warning');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetCurrentPreset() {
+            plans = [];
+            appState.presets[currentPresetIndex].plans = [];
+            saveAppState();
+            renderBoard();
+            toggleAppMenu();
+            showToast('Current preset reset', 'info');
+        }
+
+        // Close app menu when clicking outside
+        window.addEventListener('click', function(e) {
+            const menu = document.getElementById('appDropdown');
+            const button = e.target.closest('button[title="App Settings & Backup"]');
+            if (!button && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        /* INITIALIZATION */
+        window.onload = function () {
+            const a = getAnalysis();
+            if (!CURRENCIES[a.currency]) a.currency = 'OMR';
+            if (!CURRENCIES[a.displayCurrency]) a.displayCurrency = a.currency;
+            if (!CURRENCIES[a.converterTo]) a.converterTo = a.displayCurrency === a.currency ? 'USD' : a.displayCurrency;
+            populateCurrencySelects();
+            renderPresetBar();
+            renderWeather();
+            renderBoard();
+            renderAnalysis();
+            updateClock();
+            setInterval(updateClock, 1000);
+            if (a.mode === 'money') {
+                updateAnalysisRate().then(() => renderAnalysis(true));
+            }
+        };
+    </script>
+</body>
+</html>
